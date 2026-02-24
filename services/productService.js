@@ -1,6 +1,14 @@
-import Product from '../models/productModel';
+import Product from '../models/productModel.js';
 
-const createProduct = async (productData) => {};
+const createProductService = async (productData) => {
+  try {
+    const product = await Product.create(productData);
+
+    return product;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 const getAllProducts = async (query) => {};
 
@@ -8,4 +16,4 @@ const getProductById = async (productId) => {};
 
 const deleteProduct = async (productId) => {};
 
-export { createProduct, getAllProducts, getProductById, deleteProduct };
+export { createProductService, getAllProducts, getProductById, deleteProduct };

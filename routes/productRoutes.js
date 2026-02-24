@@ -6,11 +6,16 @@ import {
   deleteProduct,
 } from '../controllers/productController.js';
 
+import asyncHandler from '../middleware/asyncHandler.js';
+
 const router = express.Router();
 
-router.route('/').post(createProduct).get(getAllProducts);
+router
+  .route('/')
+  .post(asyncHandler(createProduct))
+  .get(asyncHandler(getAllProducts));
 
-router.get('/:id', getProductById);
-router.delete('/:id', deleteProduct);
+router.get('/:id', asyncHandler(getProductById));
+router.delete('/:id', asyncHandler(deleteProduct));
 
 export default router;

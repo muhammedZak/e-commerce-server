@@ -8,11 +8,13 @@ const productSchema = new mongoose.Schema(
       trim: true,
       minlength: [6, 'Product name must be at least 6 characters'],
       maxlength: [50, 'Product name cannot exceed 50 characters'],
+      index: 'text',
     },
     description: {
       type: String,
       trim: true,
       maxlength: [2000, 'Description cannot exceed 2000 characters'],
+      index: 'text',
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,6 +36,7 @@ const productSchema = new mongoose.Schema(
         validator: Number.isFinite,
         message: 'Invalid price',
       },
+      index: true,
     },
     discountPrice: {
       type: Number,
@@ -47,6 +50,7 @@ const productSchema = new mongoose.Schema(
     },
     images: {
       type: [String],
+      required: true,
       validate: {
         validator: function (images) {
           return images.length > 0 && images.length <= 10;
