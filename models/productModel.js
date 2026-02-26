@@ -1,94 +1,147 @@
 import mongoose from 'mongoose';
 
-const productSchema = new mongoose.Schema(
+const variantSchema = new mongoose.Schema(
   {
-    name: {
+    sku: {
       type: String,
-      required: [true, 'Product name is required'],
-      trim: true,
-      minlength: [6, 'Product name must be at least 6 characters'],
-      maxlength: [50, 'Product name cannot exceed 50 characters'],
-      index: 'text',
-    },
-    description: {
-      type: String,
-      trim: true,
-      maxlength: [2000, 'Description cannot exceed 2000 characters'],
-      index: 'text',
-    },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'Category is required'],
+      required: true,
+      unique: true,
       index: true,
     },
-    brand: {
-      type: String,
-      trim: true,
-      maxlength: [100, 'Brand name too long'],
-      index: true,
+
+    attributes: {
+      size: {
+        type: String,
+        required: true,
+        index: true,
+      },
+
+      color: {
+        type: String,
+        required: true,
+        index: true,
+      },
     },
+
     price: {
       type: Number,
-      required: [true, 'Price is required'],
-      min: [0, 'Price cannot be negative'],
-      validate: {
-        validator: Number.isFinite,
-        message: 'Invalid price',
-      },
-      index: true,
+      required: true,
+      min: 0,
     },
+
     discountPrice: {
       type: Number,
-      min: [0, 'Discount price cannot be negative'],
-      validate: {
-        validator: function (value) {
-          return value == null || value < this.price;
-        },
-        message: 'Discount price must be less than price',
-      },
+      min: 0,
     },
-    images: {
-      type: [String],
+
+    stock: {
+      type: Number,
       required: true,
-      validate: {
-        validator: function (images) {
-          return images.length > 0 && images.length <= 10;
-        },
-        message: 'Product must have 1–10 images',
-      },
-    },
-    totalStock: {
-      type: Number,
-      default: 0,
-      min: [0, 'Stock cannot be negative'],
-    },
-    rating: {
-      type: Number,
-      default: 0,
       min: 0,
-      max: 5,
-    },
-    numReviews: {
-      type: Number,
       default: 0,
-      min: 0,
-    },
-    isFeatured: {
-      type: Boolean,
-      default: false,
       index: true,
     },
+
+    images: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
+
     isActive: {
       type: Boolean,
       default: true,
       index: true,
     },
   },
-  {
-    timestamps: true,
-  },
+  { _id: true },
 );
 
+const productSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+    },
+
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    description: {
+      type: String,
+    },
+
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+      index: true,
+    },
+
+    subCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+      index: true,
+    },
+
+    brand: {
+      type: String,
+      index: true,
+    },
+
+    variants: {
+      type: [variantSchema],
+      validate: {
+        validator: (v) => v.length > 0,
+        message: 'Product must have at least one variant',
+      },
+    },
+
+    totalStock: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
+
+    ratingsAverage: {
+      type: Number,
+      default: 0,
+    },
+
+    ratingsCount: {
+      type: Number,
+      default: 0,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
+  },
+  { timestamps: true },
+);
+
+productSchema.pre('save', function (next) {
+  this.totalStock = this.variants.reduce(
+    (acc, variant) => acc + variant.stock,
+    0,
+  );
+  next();
+});
+
+productSchema.index({ category: 1, subCategory: 1 });
+
+productSchema.index({ name: 'text', description: 'text' });
+
 const Product = mongoose.model('Product', productSchema);
+
 export default Product;

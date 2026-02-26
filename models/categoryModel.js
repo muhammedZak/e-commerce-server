@@ -8,14 +8,12 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       minLength: 2,
       maxLength: 100,
-      unique: true,
       index: true,
     },
 
     slug: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
       index: true,
     },
@@ -30,6 +28,11 @@ const categorySchema = new mongoose.Schema(
       ref: 'Category',
       default: null,
       index: true,
+    },
+
+    level: {
+      type: Number,
+      default: 0,
     },
 
     isActive: {
