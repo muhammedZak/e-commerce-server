@@ -12,10 +12,19 @@ const createProduct = async (req, res) => {
 };
 
 const getAllProducts = async (req, res) => {
-  const products = await Product.find();
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
+  const startIndex = (page - 1) * limit;
+  const total = await Product.countDocuments();
+
+  const products = await Product.find().skip(startIndex).limit(limit);
 
   res.status(200).json({
     status: true,
+    count: products.length,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page,
     data: products,
   });
 };
